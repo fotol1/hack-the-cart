@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "hack-the-cart"
+version = "0.1.0"
+description = ""
+authors = ["nemexur <alex.milogradsky@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.8,<3.11"
+
+[tool.poetry.dev-dependencies]
+black = "^22.1.0"
+flake8 = "^4.0.1"
+ipython = "^8.1.1"
+jupyterlab = "^3.3.2"
+ipykernel = "^6.9.2"
+
+[tool.black]
+line-length = 100
+target-version = ["py38"]
+include = '\.pyi?$'
+exclude = '''
+(
+	__pycache__
+	| \.eggs         # exclude a few common directories in the
+	| \.git          # root of the project
+	| \.hg
+	| \.mypy_cache
+	| \.tox
+	| \.venv
+	| \.vscode
+	| _build
+	| buck-out
+	| build
+	| dist
+)
+'''
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
