@@ -23,9 +23,9 @@ class EASE(Model):
 
     def fit(
         self,
-        config: Dict[str, Any],
-        train: np.ndarray,
-        valid: np.ndarray = None,
+        train: sparse.csr_matrix,
+        valid: sparse.csr_matrix = None,
+        config: Dict[str, Any] = None,
     ) -> None:
         # Train part
         X = train
@@ -46,14 +46,17 @@ class EASE(Model):
         np.fill_diagonal(B, 0.0)
         self._item_matrix = B
         # Validation part
-        prediction_scores = self.predict(train.toarray())
-        for metric in self._metrics:
-            metric(prediction_scores, valid.toarray())
-        return self.get_metrics(reset=True)
+        if valid is not None:
+            scores = self.predict(train.toarray())
+            target = np.not_equal(valid.toarray(), 0).astype(np.float32)
+            for metric in self._metrics:
+                metric(scores, target)
+            return self.get_metrics(reset=True)
 
-    def predict(self, data: np.ndarray) -> np.ndarray:
+    def predict(self, data: np.ndarray, remove_seen: bool = True) -> np.ndarray:
         scores = data.dot(self._item_matrix)
-        scores[data > 0] = -1e13
+        if remove_seen:
+            scores[data > 0] = -1e13
         return scores
 
     def get_metrics(self, reset: bool = False) -> None:
@@ -66,5 +69,5 @@ class EASE(Model):
 if __name__ == "__main__":
     model = EASE()
     data = sparse.csr_matrix(np.random.randint(low=0, high=2, size=(100, 300)))
-    metrics = model.fit({}, train=data, valid=data)
+    metrics = model.fit(train=data, valid=data)
     print(metrics)

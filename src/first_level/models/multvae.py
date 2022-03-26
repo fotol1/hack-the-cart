@@ -184,7 +184,12 @@ class MultVAE(Model, torch.nn.Module):
             output_dict["logits"][source.gt(0)] = -1e13
         return output_dict
 
-    def fit(self, config: Dict[str, Any], train: Path, valid: Path = None) -> None:
+    def fit(
+        self,
+        config: Dict[str, Any],
+        train: Tuple[sparse.csr_matrix, sparse.csr_matrix],
+        valid: Tuple[sparse.csr_matrix, sparse.csr_matrix] = None,
+    ) -> None:
         self._train_config = config
         loaders = build_dataloaders(config, train=train, valid=valid)
         runner = MultVAERunner()
@@ -481,6 +486,6 @@ if __name__ == "__main__":
         config = Params.from_file(str(temp / "config.json"))
         config = registry.get_from_params(**config.as_ordered_dict())
         config["model"].fit(
-            config["train"], train=(train, deepcopy(train)), valid=(valid, deepcopy(valid))
+            train=(train, deepcopy(train)), valid=(valid, deepcopy(valid)), config=config["train"]
         )
         print(config["model"].predict(valid.toarray(), remove_seen=True))
