@@ -20,12 +20,13 @@ class ALS(Model):
         batch_size: int = 128,
     ) -> None:
         self.inner_model = inner_model
-        self._topk = topk
         self._batch_size = batch_size
         self._metrics = [
             NDCG(metrics_topk),
             Recall(metrics_topk),
         ]
+        # Train configs
+        self._train_matrix = None
 
     def fit(
         self,
@@ -39,12 +40,14 @@ class ALS(Model):
             train = sparse.load_npz(train)
         if isinstance(valid, Path):
             valid = sparse.load_npz(valid)
+        self._train_matrix = train
         self.inner_model.fit(train, show_progress=True)
         return self.validate(valid)
 
     def validate(self, data: sparse.csr_matrix) -> FitResult:
         # Compute metrics by iterating over interaction matrix.
         iterator = range(data.shape[0])
+        stop = 0
         for start, stop in tqdm(
             # Copy iterators for each islice.
             zip(
@@ -56,14 +59,14 @@ class ALS(Model):
         ):
             users = np.arange(start, stop)
             output = self.predict(users, with_fit=False)
-            target = np.not_equal(data[start:stop].toarray(), 0).astype(np.float32)[:, : self._topk]
+            target = np.not_equal(data[start:stop].toarray(), 0).astype(np.float32)
             for metric in self._metrics:
                 metric(output, target)
         # Process leftovers if needed.
         if stop < data.shape[0]:
             users = np.arange(stop, data.shape[0])
             output = self.predict(users, with_fit=False)
-            target = np.not_equal(data[stop:].toarray(), 0).astype(np.float32)[:, : self._topk]
+            target = np.not_equal(data[stop:].toarray(), 0).astype(np.float32)
             for metric in self._metrics:
                 metric(output, target)
         # user_preds_df = pd.DataFrame(
@@ -84,7 +87,9 @@ class ALS(Model):
             if data is not None
             else self.inner_model.user_factors
         )
-        return np.einsum("uh,ih->ui", user_factors, self.inner_model.item_factors)[:, : self._topk]
+        result = np.einsum("uh,ih->ui", user_factors, self.inner_model.item_factors)
+        result[self._train_matrix[data].toarray() > 0] = -1e13
+        return result
 
     def recommend(self, users: np.ndarray = None) -> Tuple[np.ndarray, np.ndarray]:
         scores = self.predict(users, with_fit=False)
