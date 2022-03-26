@@ -45,7 +45,8 @@ class SLIM(Model):
             # let's keep only the non-zero values
 
             # Select topK values
-            # Sorting is done in three steps. Faster then plain np.argsort for higher number of items
+            # Sorting is done in three steps.
+            # Faster then plain np.argsort for higher number of items
             # - Partition the data to extract the set of relevant items
             # - Sort only the relevant items
             # - Get the original item index

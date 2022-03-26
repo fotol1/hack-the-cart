@@ -8,6 +8,7 @@ import numpy as np
 from pathlib import Path
 from scipy import sparse
 from loguru import logger
+from rich import print_json
 from functools import partial
 from hydra_slayer import Registry
 from torch_nlp_utils.common import Params
@@ -28,17 +29,18 @@ def fit_first_level(
     config: Dict[str, Any],
     train: Dict[str, sparse.csr_matrix],
     valid: Dict[str, sparse.csr_matrix] = None,
-    hparams: Dict[str, Any] = None,
 ) -> Dict[str, Model]:
     seed_everything(13)
     registry = Registry(name_key="type")
     models = {}
-    if hparams is None:
+    hparams = {}
+    if any("optuna" in model_config for model_config in config["models"]):
         if valid is None:
-            raise ValueError("valid dataset is required for Optuna.")
-        logger.debug("Hyper Parameters are not passed. Running optuna to find the best one.")
+            raise ValueError("Valid dataset is required for Optuna.")
+        logger.debug("Running optuna to find the best hyper-parameters for models.")
         hparams = run_optuna(config, train=train, valid=valid)
-        logger.success("Finished optuna")
+        logger.success("Finished optuna with hparams:")
+        print_json(data=hparams)
     for model in config["models"]:
         model_type = model.get("name") or model["model"]["type"].split(".")[-1]
         logger.info("Training {}", model_type)
@@ -56,7 +58,8 @@ def fit_first_level(
         metrics = model_config["model"].fit(
             train=train[model_type], valid=valid[model_type], config=model_config.get("train")
         )
-        print(model_type, metrics)
+        logger.info(f"{model_type} metrics:")
+        print_json(data=metrics)
         models[model_type] = model_config["model"]
     logger.success("Finished training all the first level models.")
     return models

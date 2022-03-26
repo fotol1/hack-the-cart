@@ -338,10 +338,17 @@ class VAECollateBatch(CollateBatch):
 
 
 class MultVAERunner(dl.Runner):
+    def on_loader_start(self, runner: "MultVAERunner") -> None:
+        super().on_loader_start(runner)
+        self.meters = {
+            key: metrics.AdditiveMetric(compute_on_call=False)
+            for key in ("loss", "recon_error", "kl_loss", "kl_weight")
+        }
+
     def handle_batch(self, batch: VAECollateBatch) -> None:
         batch = batch.to_device(self.engine.device, non_blocking=True)
         self.batch = self.model(**batch)
-        for key in ("loss", "recon_error", "kl_loss", "kl_weight"):
+        for key in self.meters:
             metric = self.batch[key]
             self.meters[key].update(
                 metric if isinstance(metric, float) else metric.item(),
@@ -353,15 +360,8 @@ class MultVAERunner(dl.Runner):
         batch = batch.to_device(self.engine.device, non_blocking=True)
         return self.model(**batch)
 
-    def on_loader_start(self, runner: "MultVAERunner") -> None:
-        super().on_loader_start(runner)
-        self.meters = {
-            key: metrics.AdditiveMetric(compute_on_call=False)
-            for key in ("loss", "recon_error", "kl_loss", "kl_weight")
-        }
-
     def on_loader_end(self, runner: "MultVAERunner") -> None:
-        for key in ("loss", "recon_error", "kl_loss", "kl_weight"):
+        for key in self.meters:
             self.loader_metrics[key] = self.meters[key].compute()[0]
         super().on_loader_end(runner)
 
