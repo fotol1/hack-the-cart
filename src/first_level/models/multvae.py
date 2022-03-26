@@ -54,7 +54,7 @@ class KLScheduler:
 
 
 class MultinomialLoss(torch.nn.Module):
-    def __init__(self, size_average: bool = True) -> None:
+    def __init__(self, size_average: bool = False) -> None:
         super().__init__()
         self._size_average = size_average
 
@@ -127,7 +127,7 @@ class MultVAE(Model, torch.nn.Module):
         self._mu = self._mu_net(encoded)
         # sigma ~ (batch size, hidden size)
         self._sigma = self._sigma_net(encoded)
-        # sample ~ (batch size, samples, hidden size)
+        # sample ~ (batch size, hidden size)
         sample = (
             self.base_dist(encoded.device).sample(self._mu.size()[:-1])
             if random
@@ -199,7 +199,7 @@ class MultVAE(Model, torch.nn.Module):
             "ndcg": dl.NDCGCallback(
                 input_key="logits", target_key="target", topk=self._metrics_topk, log_on_batch=False
             ),
-            # In Catalyst HitRate Metrics is actually Recall.
+            # HitRate Metric is actually Recall in Catalyst.
             "recall": dl.HitrateCallback(
                 input_key="logits", target_key="target", topk=self._metrics_topk, log_on_batch=False
             ),
