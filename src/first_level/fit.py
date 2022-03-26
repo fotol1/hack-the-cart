@@ -51,7 +51,7 @@ def fit_first_level(
         print_json(data=hparams)
     for model in config["models"]:
         model_type = model.get("name") or model["model"]["type"].split(".")[-1]
-        logger.info("Training {}", model_type)
+        logger.info("Training {} with config:", model_type)
         model_config = Params(
             with_fallback(
                 preferred=(
@@ -62,6 +62,7 @@ def fit_first_level(
                 fallback=model,
             )
         )
+        print_json(data=model_config.as_ordered_dict())
         model_config = registry.get_from_params(**model_config.as_ordered_dict())
         metrics = model_config["model"].fit(
             train=train[model_type], valid=valid.get(model_type), config=model_config.get("train")
