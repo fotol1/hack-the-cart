@@ -1,6 +1,10 @@
 from typing import Dict, Any
+import os
 import json
+import torch
 import optuna
+import random
+import numpy as np
 from pathlib import Path
 from scipy import sparse
 from loguru import logger
@@ -11,12 +15,22 @@ from src.first_level.models.core import Model
 from torch_nlp_utils.common.params import with_fallback, parse_overrides
 
 
+def seed_everything(seed: int) -> None:
+    random.seed(seed)
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.backends.cudnn.deterministic = True
+
+
 def fit_first_level(
     config: Dict[str, Any],
     train: Dict[str, sparse.csr_matrix],
     valid: Dict[str, sparse.csr_matrix] = None,
     hparams: Dict[str, Any] = None,
 ) -> Dict[str, Model]:
+    seed_everything(13)
     registry = Registry(name_key="type")
     models = {}
     if hparams is None:
@@ -102,7 +116,6 @@ def objective(
 
 if __name__ == "__main__":
     import yaml
-    import numpy as np
     from scipy import sparse
 
     config_file = Path.cwd() / "configs" / "config.yaml"
