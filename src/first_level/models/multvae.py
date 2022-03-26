@@ -206,7 +206,6 @@ class MultVAE(Model, torch.nn.Module):
         }
         callbacks.update(config.get("callbacks", {}))
         optimizer = config.get("optimizer") or partial(torch.optim.Adam, lr=3e-4)
-        print(optimizer)
         runner.train(
             model=self,
             loaders=loaders,

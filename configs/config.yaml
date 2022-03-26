@@ -66,14 +66,24 @@ first_level:
           _mode_: partial
           type: torch.optim.Adam
           lr: 0.001
-        # callbacks:
-        #   early_stopping:
-        #     type: catalyst.dl.EarlyStoppingCallback
-        #     loader_key: valid
-        #     metric_key: ndcg20
-        #     minimize: false
-        #     patience: 30
-        #     min_delta: 0.0001
+      #   callbacks:
+      #     early_stopping:
+      #       type: catalyst.dl.EarlyStoppingCallback
+      #       loader_key: valid
+      #       metric_key: ndcg20
+      #       minimize: false
+      #       patience: 30
+      #       min_delta: 0.0001
+      # optuna:
+      #   metric: ndcg20
+      #   study:
+      #     n_trials: 3
+      #     n_jobs: 1
+      #   params:
+      #     train.optimizer.lr:
+      #       suggest: suggest_uniform
+      #       low: 0.00001
+      #       high: 0.001
     - model:
         type: src.first_level.models.EASE
         norm: True
