@@ -52,12 +52,13 @@ def run_optuna(config: Dict[str, Any], train: Path, valid: Path) -> None:
     for idx, model_config in enumerate(config["models"]):
         if "optuna" not in model_config:
             continue
+        optuna_config = model_config["optuna"]
         model_type = model_config["model"]["type"].split(".")[-1]
         logger.info("Running optuna for {}", model_type)
         study = optuna.create_study(
             direction="maximize",
             pruner=optuna.pruners.MedianPruner(
-                n_startup_trials=1, n_warmup_steps=0, interval_steps=1
+                n_startup_trials=3, n_warmup_steps=0, interval_steps=1
             ),
             study_name=f"first-level-{model_type}",
         )
@@ -67,9 +68,9 @@ def run_optuna(config: Dict[str, Any], train: Path, valid: Path) -> None:
                 config=model_config,
                 train=train[model_type],
                 valid=valid[model_type],
-                metric_key=model_config["optuna_metric"],
+                metric_key=optuna_config["metric"],
             ),
-            n_trials=5,
+            **optuna_config["study"],
         )
         hparams[model_type] = study.best_params
     return hparams
@@ -83,11 +84,12 @@ def objective(
     metric_key: str,
 ) -> Dict[str, Any]:
     registry = Registry(name_key="type")
+    optuna_config = config["optuna"]
     params_overrides = {
         key: getattr(trial, value.get("suggest"))(
             name=key, **{k: v for k, v in value.items() if k != "suggest"}
         )
-        for key, value in config["optuna"].items()
+        for key, value in optuna_config["params"].items()
     }
     config = Params(
         with_fallback(preferred=parse_overrides(json.dumps(params_overrides)), fallback=config)

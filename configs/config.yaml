@@ -16,15 +16,19 @@ first_level:
         topk: *topk
         metrics_topk: *metrics_topk
       optuna:
-        model.inner_model.factors:
-          suggest: suggest_int
-          low: 100
-          high: 256
-        model.inner_model.iterations:
-          suggest: suggest_int
-          low: 100
-          high: 200
-      optuna_metric: ndcg@20
+        metric: ndcg@20
+        study:
+          n_trials: 5
+          n_jobs: 1
+        params:
+          model.inner_model.factors:
+            suggest: suggest_int
+            low: 100
+            high: 256
+          model.inner_model.iterations:
+            suggest: suggest_int
+            low: 100
+            high: 200
     - model:
         type: src.first_level.models.MultVAE
         encoder:
