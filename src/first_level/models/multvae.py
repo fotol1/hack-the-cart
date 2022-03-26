@@ -374,7 +374,7 @@ def build_dataloaders(
         config["loader"]["shuffle"] = False
         config["loader"]["drop_last"] = False
         loaders["test"] = DataLoader(
-            reader.read(test), collate_fn=multvae_collate_fn, **config["loader"]
+            reader.read(test), collate_fn=partial(multvae_collate_fn, only_new_items=True), **config["loader"]
         )
     return loaders
 

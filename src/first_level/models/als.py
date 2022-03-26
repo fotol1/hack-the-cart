@@ -7,8 +7,8 @@ from copy import deepcopy
 from itertools import islice
 from src.metrics import NDCG, Recall
 from scipy.sparse.linalg import spsolve
+from src.first_level.models.core import Model
 from implicit.als import AlternatingLeastSquares
-from src.first_level.models.core import Model, FitResult
 
 
 class ALS(Model):
@@ -33,7 +33,7 @@ class ALS(Model):
         config: Dict[str, Any],
         train: Union[Path, sparse.csr_matrix],
         valid: Union[Path, sparse.csr_matrix],
-    ) -> FitResult:
+    ) -> Dict[str, float]:
         """Fit iALS on sparse matrix of user to item interactions."""
         # Force data to be sparse csr matrix just in case.
         if isinstance(train, Path):
@@ -44,7 +44,7 @@ class ALS(Model):
         self.inner_model.fit(train, show_progress=True)
         return self.validate(valid)
 
-    def validate(self, data: sparse.csr_matrix) -> FitResult:
+    def validate(self, data: sparse.csr_matrix) -> Dict[str, float]:
         # Compute metrics by iterating over interaction matrix.
         iterator = range(data.shape[0])
         stop = 0

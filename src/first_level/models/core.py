@@ -1,14 +1,8 @@
 from typing import Dict, Union
-import pandas as pd
+import numpy as np
 from pathlib import Path
 from scipy import sparse
 from dataclasses import dataclass
-
-
-@dataclass
-class FitResult:
-    metrics: Dict[str, float]
-    predicts: pd.DataFrame
 
 
 class Model:
@@ -19,7 +13,7 @@ class Model:
     ) -> Dict[str, float]:
         raise NotImplementedError()
 
-    def get_metrics(self, reset: bool = False) -> Dict[str, float]:
+    def predict(self, data: np.ndarray) -> np.ndarray:
         raise NotImplementedError()
 
     def save(serialization_dir: Path) -> None:
