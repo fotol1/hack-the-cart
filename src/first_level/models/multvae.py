@@ -7,13 +7,12 @@ from tqdm import tqdm
 from pathlib import Path
 from scipy import sparse
 from copy import deepcopy
-from functools import partial
 import torch.distributions as D
 import torch.nn.functional as F
-from functools import lru_cache
 from catalyst import dl, metrics
 from hydra_slayer import Registry
 from torch.utils.data import DataLoader
+from functools import lru_cache, partial
 from src.first_level.models.core import Model
 from src.first_level.models.nn import FeedForward
 from torch_nlp_utils.data import DatasetReader, CollateBatch, Batch
@@ -206,11 +205,13 @@ class MultVAE(Model, torch.nn.Module):
             ),
         }
         callbacks.update(config.get("callbacks", {}))
+        optimizer = config.get("optimizer") or partial(torch.optim.Adam, lr=3e-4)
+        print(optimizer)
         runner.train(
             model=self,
             loaders=loaders,
             engine=config["engine"],
-            optimizer=torch.optim.Adam(self.parameters(), lr=1e-3),
+            optimizer=optimizer(self.parameters()),
             num_epochs=config["epochs"],
             seed=13,
             timeit=False,

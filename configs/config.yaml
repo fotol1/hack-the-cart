@@ -1,4 +1,7 @@
 ---
+shared:
+  metrics_topk: &metrics_topk [20, 50, 100]
+
 first_level:
   models:
     - model:
@@ -11,7 +14,7 @@ first_level:
         scaling:
           type: src.first_level.models.als.LinearScaling
           alpha: 40.0
-        metrics_topk: &metrics_topk [20, 50, 100]
+        metrics_topk: *metrics_topk
       optuna:
         metric: ndcg@20
         study:
@@ -59,6 +62,18 @@ first_level:
           batch_size: 128
           shuffle: true
           drop_last: true
+        optimizer:
+          _mode_: partial
+          type: torch.optim.Adam
+          lr: 0.001
+        # callbacks:
+        #   early_stopping:
+        #     type: catalyst.dl.EarlyStoppingCallback
+        #     loader_key: valid
+        #     metric_key: ndcg20
+        #     minimize: false
+        #     patience: 30
+        #     min_delta: 0.0001
     - model:
         type: src.first_level.models.EASE
         norm: True

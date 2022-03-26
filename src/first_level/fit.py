@@ -9,11 +9,16 @@ from pathlib import Path
 from scipy import sparse
 from loguru import logger
 from rich import print_json
-from functools import partial
 from hydra_slayer import Registry
+from functools import partial, lru_cache
 from torch_nlp_utils.common import Params
 from src.first_level.models.core import Model
 from torch_nlp_utils.common.params import with_fallback, parse_overrides
+
+
+@lru_cache(maxsize=None)
+def get_registry() -> Registry:
+    return Registry(name_key="type")
 
 
 def seed_everything(seed: int) -> None:
@@ -30,8 +35,11 @@ def fit_first_level(
     train: Dict[str, sparse.csr_matrix],
     valid: Dict[str, sparse.csr_matrix] = None,
 ) -> Dict[str, Model]:
+    logger.info("Fit first level with config:")
+    print_json(data=config)
+    # Seed everything just in case
     seed_everything(13)
-    registry = Registry(name_key="type")
+    registry = get_registry()
     valid = valid or {}
     models, hparams = {}, {}
     if any("optuna" in model_config for model_config in config["models"]):
@@ -101,7 +109,7 @@ def objective(
     valid: Path,
     metric_key: str,
 ) -> Dict[str, Any]:
-    registry = Registry(name_key="type")
+    registry = get_registry()
     optuna_config = config["optuna"]
     params_overrides = {
         key: getattr(trial, value.get("suggest"))(
