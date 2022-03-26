@@ -3,6 +3,7 @@ import math
 import torch
 import optuna
 import numpy as np
+from tqdm import tqdm
 from pathlib import Path
 from scipy import sparse
 from copy import deepcopy
@@ -159,6 +160,7 @@ class MultVAE(Model, torch.nn.Module):
             self._kl_scheduler.step()
         if target is None:
             return {
+                "source": source,
                 "logits": logits,
                 "probs": logits.softmax(dim=-1),
             }
@@ -211,7 +213,7 @@ class MultVAE(Model, torch.nn.Module):
         )
         return runner.loader_metrics
 
-    def predict(self, data: np.ndarray) -> np.ndarray:
+    def predict(self, data: np.ndarray, remove_seen: bool = True) -> np.ndarray:
         loaders = build_dataloaders(
             self._train_config,
             test=(sparse.csr_matrix(data),),
@@ -219,8 +221,15 @@ class MultVAE(Model, torch.nn.Module):
         runner = MultVAERunner()
         start = 0
         scores = np.zeros(data.shape)
-        for output_dict in runner.predict_loader(loader=loaders["test"], model=self):
+        for output_dict in tqdm(
+            runner.predict_loader(loader=loaders["test"], model=self),
+            desc="Predict with MultVAE",
+            total=len(loaders["test"]),
+        ):
             end = output_dict["logits"].size(0)
+            if remove_seen:
+                output_dict["logits"][output_dict["source"].gt(0)] = -1e13
+                output_dict["probs"] = output_dict["logits"].softmax(dim=-1)
             scores[start : start + end] = output_dict["probs"]
             start += end
         return scores
@@ -375,7 +384,7 @@ def build_dataloaders(
         config["loader"]["shuffle"] = False
         config["loader"]["drop_last"] = False
         loaders["test"] = DataLoader(
-            reader.read(test), collate_fn=partial(multvae_collate_fn, only_new_items=True), **config["loader"]
+            reader.read(test), collate_fn=multvae_collate_fn, **config["loader"]
         )
     return loaders
 
@@ -474,4 +483,4 @@ if __name__ == "__main__":
         config["model"].fit(
             config["train"], train=(train, deepcopy(train)), valid=(valid, deepcopy(valid))
         )
-        print(config["model"].predict(valid.toarray()))
+        print(config["model"].predict(valid.toarray(), remove_seen=True))

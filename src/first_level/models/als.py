@@ -111,7 +111,7 @@ class ALS(Model):
         # Compute yTy and xTx at beginning of each iteration to save computing time
 
         result_vectors = []
-        for user_vector in user_vectors:
+        for user_vector in tqdm(user_vectors, desc="Predict with ALS", total=len(user_vectors)):
             conf_samp = user_vector.T  # Grab user row from confidence matrix and convert to dense
             pref = conf_samp.copy()
             pref[pref != 0] = 1  # Create binarized preference vector
@@ -150,4 +150,3 @@ if __name__ == "__main__":
     metrics = model.fit({}, train=data, valid=data)
     check = model.predict(data.toarray(), with_fit=True)
     print(check)
-    print(check.shape)
