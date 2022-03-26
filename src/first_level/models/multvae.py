@@ -5,6 +5,7 @@ import optuna
 import numpy as np
 from pathlib import Path
 from scipy import sparse
+from copy import deepcopy
 from functools import partial
 import torch.distributions as D
 import torch.nn.functional as F
@@ -167,8 +168,9 @@ class MultVAE(Model, torch.nn.Module):
         kl_loss = (posterior_log_prob - prior_log_prob).clamp(min=self._free_bits_alpha)
         loss = recon_error + self._kl_scheduler.weight * kl_loss
         output_dict = {
-            "logits": logits,
+            "source": source,
             "target": target,
+            "logits": logits,
             "probs": logits.softmax(dim=-1),
             "loss": loss.mean(),
             "kl_weight": self._kl_scheduler.weight,
@@ -323,9 +325,9 @@ class VAECollateBatch(CollateBatch):
 class MultVAERunner(dl.Runner):
     def handle_batch(self, batch: VAECollateBatch) -> None:
         batch = batch.to_device(self.engine.device, non_blocking=True)
-        self.output = self.model(**batch)
+        self.batch = self.model(**batch)
         for key in ("loss", "recon_error", "kl_loss", "kl_weight"):
-            metric = self.output[key]
+            metric = self.batch[key]
             self.meters[key].update(
                 metric if isinstance(metric, float) else metric.item(),
                 self.batch_size,
@@ -468,5 +470,7 @@ if __name__ == "__main__":
             print(study.best_params)
         config = Params.from_file(str(temp / "config.json"))
         config = registry.get_from_params(**config.as_ordered_dict())
-        config["model"].fit(config["train"], train=(train, train), valid=(valid, valid))
+        config["model"].fit(
+            config["train"], train=(train, deepcopy(train)), valid=(valid, deepcopy(valid))
+        )
         print(config["model"].predict(valid.toarray()))
