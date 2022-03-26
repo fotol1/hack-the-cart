@@ -60,6 +60,7 @@ class ALS(Model):
     ) -> Dict[str, float]:
         """Fit iALS on sparse matrix of user to item interactions."""
         # Force data to be sparse csr matrix just in case.
+        train = deepcopy(train)
         if self._scaling is not None:
             train = self._scaling.apply(train)
         self._train_matrix = train
