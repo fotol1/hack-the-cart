@@ -127,7 +127,8 @@ class ALS(Model):
             result_vectors.append(X)
             # Solve for Xu = ((yTy + yT(Cu-I)Y + lambda*I)^-1)yTCuPu, equation 4 from the paper
             # Begin iteration to solve for Y based on fixed X
-        return np.array(result_vectors)
+        result_vectors = np.array(result_vectors)
+        return np.einsum("uh,ih->ui", result_vectors, item_factors)
 
     def get_metrics(self, reset: bool = False) -> Dict[str, float]:
         metrics = {}
