@@ -39,9 +39,10 @@ def fit_first_level(
             )
         )
         model_config = registry.get_from_params(**model_config.as_ordered_dict())
-        model_config["model"].fit(
+        metrics = model_config["model"].fit(
             model_config.get("train", {}), train=train[model_type], valid=valid[model_type]
         )
+        print(model_type, metrics)
         models[model_type] = model_config["model"]
     logger.success("Finished training all the first level models.")
     return models
@@ -113,6 +114,7 @@ if __name__ == "__main__":
             sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
             sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
         ),
+        "EASE": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
     }
     valid = {
         "ALS": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
@@ -120,6 +122,7 @@ if __name__ == "__main__":
             sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
             sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
         ),
+        "EASE": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
     }
     models = fit_first_level(config["first_level"], train=train, valid=valid)
     print(models)

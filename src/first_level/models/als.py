@@ -15,7 +15,6 @@ class ALS(Model):
     def __init__(
         self,
         inner_model: AlternatingLeastSquares,
-        topk: int = 200,
         metrics_topk: List[int] = [20, 100],
         batch_size: int = 128,
     ) -> None:

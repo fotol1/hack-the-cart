@@ -104,6 +104,7 @@ class MultVAE(Model, torch.nn.Module):
             torch.nn.Hardtanh(min_val=1e-4, max_val=5.0),
         )
         # Fit predict
+        self._metrics_topk = metrics_topk
         self._train_config = None
 
     @lru_cache(maxsize=None)
@@ -190,11 +191,11 @@ class MultVAE(Model, torch.nn.Module):
             "backward": dl.BackwardCallback(metric_key="loss"),
             "optimizer": dl.OptimizerCallback(metric_key="loss"),
             "ndcg": dl.NDCGCallback(
-                input_key="logits", target_key="target", topk=[20, 50, 100], log_on_batch=False
+                input_key="logits", target_key="target", topk=self._metrics_topk, log_on_batch=False
             ),
             # In Catalyst HitRate Metrics is actually Recall.
             "recall": dl.HitrateCallback(
-                input_key="logits", target_key="target", topk=[20, 50, 100], log_on_batch=False
+                input_key="logits", target_key="target", topk=self._metrics_topk, log_on_batch=False
             ),
         }
         callbacks.update(config.get("callbacks", {}))

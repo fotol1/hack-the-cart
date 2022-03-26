@@ -1,7 +1,6 @@
 ---
 shared:
-  topk: &topk 200
-  metrics_topk: &metrics_topk [20, 100]
+  metrics_topk: &metrics_topk [20, 50, 100]
 
 
 first_level:
@@ -13,7 +12,6 @@ first_level:
           factors: 100
           num_threads: 4
           iterations: 100
-        topk: *topk
         metrics_topk: *metrics_topk
       optuna:
         metric: ndcg@20
@@ -57,3 +55,18 @@ first_level:
           batch_size: 128
           shuffle: true
           drop_last: true
+    - model:
+        type: src.first_level.models.EASE
+        norm: True
+        reg_weight: 100
+        metrics_topk: *metrics_topk
+      optuna:
+        metric: ndcg@20
+        study:
+          n_trials: 5
+          n_jobs: 1
+        params:
+          model.reg_weight:
+            suggest: suggest_int
+            low: 100
+            high: 200
