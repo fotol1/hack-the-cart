@@ -32,10 +32,10 @@ def fit_first_level(
 ) -> Dict[str, Model]:
     seed_everything(13)
     registry = Registry(name_key="type")
-    models = {}
-    hparams = {}
+    valid = valid or {}
+    models, hparams = {}, {}
     if any("optuna" in model_config for model_config in config["models"]):
-        if valid is None:
+        if valid is None or len(valid) == 0:
             raise ValueError("Valid dataset is required for Optuna.")
         logger.debug("Running optuna to find the best hyper-parameters for models.")
         hparams = run_optuna(config, train=train, valid=valid)
@@ -56,7 +56,7 @@ def fit_first_level(
         )
         model_config = registry.get_from_params(**model_config.as_ordered_dict())
         metrics = model_config["model"].fit(
-            train=train[model_type], valid=valid[model_type], config=model_config.get("train")
+            train=train[model_type], valid=valid.get(model_type), config=model_config.get("train")
         )
         logger.info(f"{model_type} metrics:")
         print_json(data=metrics)
