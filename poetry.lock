@@ -1039,11 +1039,11 @@ tests = ["fakeredis", "pytest"]
 
 [[package]]
 name = "overrides"
-version = "6.1.0"
+version = "4.0.0"
 description = "A decorator to automatically detect mismatch when overriding a method."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = "*"
 
 [package.dependencies]
 typing-utils = ">=0.0.3"
@@ -1779,7 +1779,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "aff006073deaf9f7d433b5bf49b472ea5afad197709f9772657864a4eb49d06f"
+content-hash = "273a48f28e79a20aa9a00b82f474ccd8e975f111caf76219bbfaf877f2a7c543"
 
 [metadata.files]
 accelerate = [
@@ -2375,8 +2375,7 @@ optuna = [
     {file = "optuna-2.10.0.tar.gz", hash = "sha256:04c3100a4fe88a71dc72f69d8a10ec9db7c9a0c884feaf932b68632b00686a8d"},
 ]
 overrides = [
-    {file = "overrides-6.1.0-py3-none-any.whl", hash = "sha256:33926e018a952b06309517b3febede982112b86430e588bdd00560b80a4a800b"},
-    {file = "overrides-6.1.0.tar.gz", hash = "sha256:5ba636b73bf72d3d80550f4a5dfe3c7d04ec6e8fd246c4074bfc7ad82bd0ea3d"},
+    {file = "overrides-4.0.0.tar.gz", hash = "sha256:406fcc838cca66b45e0af989ef422e1d62bc38e6acdee820855213b9612bb963"},
 ]
 packaging = [
     {file = "packaging-21.3-py3-none-any.whl", hash = "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522"},

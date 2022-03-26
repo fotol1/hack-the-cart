@@ -20,6 +20,7 @@ implicit = "^0.5.2"
 optuna = "^2.10.0"
 catalyst = "^22.2.1"
 loguru = "0.5.3"
+overrides = "4.0.0"
 xgboost = "^1.5.2"
 torch-nlp-utils = {git = "https://github.com/Nemexur/torch-nlp-utils.git"}
 
