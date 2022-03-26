@@ -1,0 +1,55 @@
+---
+shared:
+  topk: &topk 200
+  metrics_topk: &metrics_topk [20, 100]
+
+
+first_level:
+  models:
+    - model:
+        type: src.first_level.models.ALS
+        inner_model:
+          type: implicit.cpu.als.AlternatingLeastSquares
+          factors: 100
+          num_threads: 4
+          iterations: 100
+        topk: *topk
+        metrics_topk: *metrics_topk
+      optuna:
+        model.inner_model.factors:
+          suggest: suggest_int
+          low: 100
+          high: 256
+        model.inner_model.iterations:
+          suggest: suggest_int
+          low: 100
+          high: 200
+      optuna_metric: ndcg@20
+    - model:
+        type: src.first_level.models.MultVAE
+        encoder:
+          type: src.first_level.models.nn.FeedForward
+          input_size: &input_size 300
+          num_layers: 1
+          hidden_sizes: [600]
+          activations: tanh
+        decoder:
+          type: src.first_level.models.nn.FeedForward
+          input_size: 200
+          num_layers: 2
+          hidden_sizes: [600, *input_size]
+          activations: tanh
+        kl_scheduler:
+          type: src.first_level.models.multvae.KLScheduler
+          zero_weight_steps: 200
+          annealing_steps: 600
+          max_weight: 0.2
+        sample_size: 200
+      train:
+        engine:
+          type: catalyst.dl.CPUEngine
+        epochs: 30
+        loader:
+          batch_size: 128
+          shuffle: true
+          drop_last: true

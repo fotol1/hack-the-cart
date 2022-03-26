@@ -6,6 +6,21 @@ authors = ["nemexur <alex.milogradsky@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.11"
+numpy = "^1.22.3"
+torch = "1.9.1"
+seaborn = "^0.11.2"
+pandas = "^1.4.1"
+scipy = "^1.8.0"
+einops = "^0.4.1"
+scikit-learn = "^1.0.2"
+rich = "^12.0.1"
+tqdm = "^4.63.1"
+hydra-slayer = "^0.4.0"
+implicit = "^0.5.2"
+optuna = "^2.10.0"
+catalyst = "^22.2.1"
+loguru = "0.5.3"
+torch-nlp-utils = {git = "https://github.com/Nemexur/torch-nlp-utils.git"}
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"
