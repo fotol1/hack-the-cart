@@ -26,7 +26,7 @@ def fit_first_level(
         hparams = run_optuna(config, train=train, valid=valid)
         logger.success("Finished optuna")
     for model in config["models"]:
-        model_type = model["model"]["type"].split(".")[-1]
+        model_type = model.get("name") or model["model"]["type"].split(".")[-1]
         logger.info("Training {}", model_type)
         model_config = Params(
             with_fallback(
@@ -40,7 +40,7 @@ def fit_first_level(
         )
         model_config = registry.get_from_params(**model_config.as_ordered_dict())
         metrics = model_config["model"].fit(
-            model_config.get("train", {}), train=train[model_type], valid=valid[model_type]
+            train=train[model_type], valid=valid[model_type], config=model_config.get("train")
         )
         print(model_type, metrics)
         models[model_type] = model_config["model"]
@@ -54,7 +54,7 @@ def run_optuna(config: Dict[str, Any], train: Path, valid: Path) -> None:
         if "optuna" not in model_config:
             continue
         optuna_config = model_config["optuna"]
-        model_type = model_config["model"]["type"].split(".")[-1]
+        model_type = model_config.get("name") or model_config["model"]["type"].split(".")[-1]
         logger.info("Running optuna for {}", model_type)
         study = optuna.create_study(
             direction="maximize",
@@ -96,7 +96,7 @@ def objective(
         with_fallback(preferred=parse_overrides(json.dumps(params_overrides)), fallback=config)
     )
     config = registry.get_from_params(**config.as_ordered_dict())
-    metrics = config["model"].fit(config.get("train", {}), train=train, valid=valid)
+    metrics = config["model"].fit(train=train, valid=valid, config=config.get("train"))
     return metrics[metric_key]
 
 
@@ -115,6 +115,8 @@ if __name__ == "__main__":
             sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
         ),
         "EASE": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
+        "EASE-check": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
+        "SLIM": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
     }
     valid = {
         "ALS": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
@@ -123,6 +125,8 @@ if __name__ == "__main__":
             sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
         ),
         "EASE": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
+        "EASE-check": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
+        "SLIM": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
     }
     models = fit_first_level(config["first_level"], train=train, valid=valid)
     print(models)
