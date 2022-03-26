@@ -75,13 +75,13 @@ class ALS(Model):
         # ).explode(["item", "score"])
         return self.get_metrics(reset=True)
 
-    def predict(self, users: np.ndarray = None, with_fit: bool = True) -> np.ndarray:
+    def predict(self, data: np.ndarray = None, with_fit: bool = True) -> np.ndarray:
         """Get prediction only for certain users. If None perform computation for all the users."""
         if with_fit:
-            return self.predict_with_fit(users)
+            return self.predict_with_fit(data)
         user_factors = (
-            self.inner_model.user_factors[users]
-            if users is not None
+            self.inner_model.user_factors[data]
+            if data is not None
             else self.inner_model.user_factors
         )
         return np.einsum("uh,ih->ui", user_factors, self.inner_model.item_factors)[:, : self._topk]
@@ -127,7 +127,6 @@ class ALS(Model):
             result_vectors.append(X)
             # Solve for Xu = ((yTy + yT(Cu-I)Y + lambda*I)^-1)yTCuPu, equation 4 from the paper
             # Begin iteration to solve for Y based on fixed X
-        print(len(result_vectors), result_vectors[0].shape)
         return np.array(result_vectors)
 
     def get_metrics(self, reset: bool = False) -> Dict[str, float]:

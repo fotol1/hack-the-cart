@@ -208,8 +208,11 @@ class MultVAE(Model, torch.nn.Module):
         )
         return runner.loader_metrics
 
-    def predict(self, data: sparse.csr_matrix) -> np.ndarray:
-        loaders = build_dataloaders(self._train_config, test=(data,))
+    def predict(self, data: np.ndarray) -> np.ndarray:
+        loaders = build_dataloaders(
+            self._train_config,
+            test=(sparse.csr_matrix(data),),
+        )
         runner = MultVAERunner()
         start = 0
         scores = np.zeros(data.shape)
@@ -412,7 +415,7 @@ if __name__ == "__main__":
             },
             "train": {
                 "engine": {"type": "catalyst.dl.CPUEngine"},
-                "epochs": 100,
+                "epochs": 10,
                 "loader": {
                     "batch_size": 128,
                     "shuffle": True,
@@ -466,4 +469,4 @@ if __name__ == "__main__":
         config = Params.from_file(str(temp / "config.json"))
         config = registry.get_from_params(**config.as_ordered_dict())
         config["model"].fit(config["train"], train=(train, train), valid=(valid, valid))
-        print(config["model"].predict(valid))
+        print(config["model"].predict(valid.toarray()))
