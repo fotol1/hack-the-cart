@@ -67,4 +67,7 @@ def get_app() -> FastAPI:
     app.add_api_route(
         "/recs", get_recs, methods=["GET"], description="Get recommendations for user' items."
     )
+    app.add_api_route(
+        "/health", health, methods=["GET"], description="I'm alive!!!!!"
+    )
     return app
