@@ -151,7 +151,7 @@ class SAR(Model):
             half_life=self._time_decay_half_life,
         )
         # group time decayed ratings by user-item and take the sum as the user-item affinity
-        return df.groupby([self.col_user, self.col_item]).sum().reset_index()
+        return df.groupby([col_user, col_item]).sum().reset_index()
 
 
 if __name__ == "__main__":
