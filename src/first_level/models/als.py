@@ -38,9 +38,9 @@ class ALS(Model):
     def __init__(
         self,
         inner_model: AlternatingLeastSquares,
-        metrics_topk: List[int] = [20, 50, 100],
         scaling: Scaling = None,
         batch_size: int = 128,
+        metrics_topk: List[int] = [20, 50, 100],
     ) -> None:
         self.inner_model = inner_model
         self._scaling = scaling
