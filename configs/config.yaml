@@ -129,3 +129,8 @@ first_level:
           max_iter: 100
           tol: 0.0001
         metrics_topk: *metrics_topk
+    - model:
+        type: src.first_level.models.SAR
+        similarity: jaccard
+        threshold: 1.0
+        metrics_topk: *metrics_topk

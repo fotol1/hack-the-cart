@@ -142,6 +142,7 @@ if __name__ == "__main__":
         "EASE": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
         "EASE-check": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
         "SLIM": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
+        "SAR": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
     }
     valid = {
         "ALS": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
@@ -152,6 +153,7 @@ if __name__ == "__main__":
         "EASE": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
         "EASE-check": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
         "SLIM": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
+        "SAR": sparse.csr_matrix(np.random.randint(low=0, high=2, size=(300, 300))),
     }
     models = fit_first_level(config["first_level"], train=train, valid=valid)
     print(models)
