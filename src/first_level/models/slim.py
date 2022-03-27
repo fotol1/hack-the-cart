@@ -22,13 +22,13 @@ class SLIM(Model):
         ]
 
     def _train(self, train: sparse.csr_matrix) -> None:
-        train = sparse.csc_matrix(train)
+        train = train.tocsc()
         n_items = train.shape[1]
         # Use array as it reduces memory requirements compared to lists
-        dataBlock = 10_000_000
-        rows = np.zeros(dataBlock, dtype=np.int32)
-        cols = np.zeros(dataBlock, dtype=np.int32)
-        values = np.zeros(dataBlock, dtype=np.float32)
+        data_block = 10_000_000
+        rows = np.zeros(data_block, dtype=np.int32)
+        cols = np.zeros(data_block, dtype=np.int32)
+        values = np.zeros(data_block, dtype=np.float32)
         num_cells = 0
         # fit each item's factors sequentially (not in parallel)
         for current_item in tqdm(range(n_items), desc="Train SLIM", total=n_items):
@@ -62,9 +62,9 @@ class SLIM(Model):
             ranking = relevant_items_partition[relevant_items_partition_sorting]
             for index in range(len(ranking)):
                 if num_cells == len(rows):
-                    rows = np.concatenate((rows, np.zeros(dataBlock, dtype=np.int32)))
-                    cols = np.concatenate((cols, np.zeros(dataBlock, dtype=np.int32)))
-                    values = np.concatenate((values, np.zeros(dataBlock, dtype=np.float32)))
+                    rows = np.concatenate((rows, np.zeros(data_block, dtype=np.int32)))
+                    cols = np.concatenate((cols, np.zeros(data_block, dtype=np.int32)))
+                    values = np.concatenate((values, np.zeros(data_block, dtype=np.float32)))
                 rows[num_cells] = nonzero_model_coef_index[ranking[index]]
                 cols[num_cells] = current_item
                 values[num_cells] = nonzero_model_coef_value[ranking[index]]
