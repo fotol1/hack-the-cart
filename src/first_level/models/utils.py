@@ -3,7 +3,7 @@ import pandas as pd
 from scipy import sparse
 
 
-def exponential_decay(value, max_val, half_life):
+def exponential_decay(value: np.ndarray, max_val: float, half_life: float) -> np.ndarray:
     """
     Compute decay factor for a given value based on an exponential decay.
     Values greater than `max_val` will be set to 1.
@@ -81,7 +81,7 @@ def apply_time_decay(
     time_now = df[col_timestamp].max()
     # apply time decay to each rating
     df[decay_col] *= exponential_decay(
-        value=df[col_timestamp],
+        value=df[col_timestamp].values,
         max_val=time_now,
         half_life=time_decay_half_life,
     )
