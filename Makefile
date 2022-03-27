@@ -12,19 +12,20 @@ all: help
 
 help:
 	@echo "Commands:"
-	@echo "  \033[00;32minstall\033[0m   - setup virtual environment with extra configuration."
-	@echo "  \033[00;32mformat\033[0m - format code with Black. Override \033[00;33mFILES\033[0m variable to format certain file or files."
-	@echo "  \033[00;32mlint\033[0m   - run linting in the code base. Override \033[00;33mFILES\033[0m variable to lint certain file or files."
-	@echo "  \033[00;32mclean\033[0m  - remove all Python artifacts."
-
-app:
-	@echo "[ \033[00;32mStarting application\033[0m ]"
-	@. $(VENV)/bin/activate && gunicorn --config src/app/gunicorn_config.py "src.app.main:get_app()"
+	@echo "  \033[00;32minstall\033[0m - setup virtual environment."
+	@echo "  \033[00;32mapp\033[0m     - run FatAPI application to server recommendations."
+	@echo "  \033[00;32mformat\033[0m  - format code with Black. Override \033[00;33mFILES\033[0m variable to format certain file or files."
+	@echo "  \033[00;32mlint\033[0m    - run linting in the code base. Override \033[00;33mFILES\033[0m variable to lint certain file or files."
+	@echo "  \033[00;32mclean\033[0m   - remove all Python artifacts."
 
 install:
 	@poetry config virtualenvs.in-project true
 	@poetry install
 	@echo "[ \033[00;32mPoetry setup completed. You are good to go!\033[0m ]"
+
+app:
+	@echo "[ \033[00;32mStarting application\033[0m ]"
+	@. $(VENV)/bin/activate && gunicorn --config src/app/gunicorn_config.py "src.app.main:get_app()"
 
 format:
 	$(RUN) black $(FILES)
