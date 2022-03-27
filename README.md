@@ -1,4 +1,4 @@
-# Application: Hack The Cart
+# Hack The Cart
 
 ## Установка зависимостей
 
