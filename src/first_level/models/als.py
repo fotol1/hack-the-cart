@@ -59,12 +59,10 @@ class ALS(Model):
         config: Dict[str, Any] = None,
     ) -> Dict[str, float]:
         """Fit iALS on sparse matrix of user to item interactions."""
-        # Force data to be sparse csr matrix just in case.
-        train = deepcopy(train)
+        self._train_matrix = deepcopy(train)
         if self._scaling is not None:
-            train = self._scaling.apply(train)
-        self._train_matrix = train
-        self.inner_model.fit(train, show_progress=True)
+            self._train_matrix = self._scaling.apply(self._train_matrix)
+        self.inner_model.fit(self._train_matrix, show_progress=True)
         if valid is not None:
             return self.validate(valid)
 
