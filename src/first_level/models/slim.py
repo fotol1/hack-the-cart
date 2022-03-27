@@ -2,6 +2,7 @@ from typing import List, Dict, Any
 import numpy as np
 from tqdm import tqdm
 from scipy import sparse
+from copy import deepcopy
 from src.metrics import NDCG, Recall
 from sklearn.linear_model import ElasticNet
 from src.first_level.models.core import Model
@@ -22,7 +23,7 @@ class SLIM(Model):
         ]
 
     def _train(self, train: sparse.csr_matrix) -> None:
-        train = train.tocsc()
+        train = deepcopy(train.tocsc())
         n_items = train.shape[1]
         # Use array as it reduces memory requirements compared to lists
         data_block = 10_000_000
