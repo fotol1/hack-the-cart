@@ -271,8 +271,8 @@ class VAEDatasetReader(DatasetReader):
     ) -> Iterable[Dict[str, Any]]:
         # Source and target would have an equal number of rows
         # so it is ok to get an index like that
-        source_matrix = matrices[0]
-        target_matrix = matrices[1] if len(matrices) == 2 else None
+        source_matrix = deepcopy(matrices[0])
+        target_matrix = deepcopy(matrices[1]) if len(matrices) == 2 else None
         for idx in range(source_matrix.shape[0]):
             source = source_matrix[idx]
             target = target_matrix[idx] if target_matrix is not None else None
