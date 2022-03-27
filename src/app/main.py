@@ -65,9 +65,11 @@ def get_app() -> FastAPI:
     get_model()
     app = FastAPI(description=(Path.cwd() / "README.md").read_text())
     app.add_api_route(
-        "/recs", get_recs, methods=["GET"], description="Get recommendations for user' items."
+        "/recs",
+        get_recs,
+        methods=["GET"],
+        description="Get recommendations for user' items.",
+        response_model=RecsResponse,
     )
-    app.add_api_route(
-        "/health", health, methods=["GET"], description="I'm alive!!!!!"
-    )
+    app.add_api_route("/health", health, methods=["GET"], description="I'm alive!!!!!")
     return app
